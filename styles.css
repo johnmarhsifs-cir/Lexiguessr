@@ -234,6 +234,7 @@ h1 {
   color: var(--ink);
   font-size: 0.92rem;
 }
+
 .guess-input:focus {
   border-color: var(--mint-deep);
   box-shadow: 0 0 0 3px #dceee4;
