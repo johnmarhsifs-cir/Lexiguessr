@@ -9,6 +9,7 @@ const fallbackWords = [
     example:
       "“The old photograph filled her with nostalgia for summers by the sea.”",
   },
+
   {
     word: "ephemeral",
     definition: "Lasting for a very short time; fleeting.",
