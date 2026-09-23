@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LexiGuesser | Learn the word</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <header class="topbar">
+        <div class="brand">
+          <div class="mark">L</div>
+          LexiGuesser
+        </div>
+        <div class="top-actions">
+          <span>Vocabulary studio</span>
+          <div class="streak">● <span id="streak">03</span> day streak</div>
+        </div>
+      </header>
+      <main class="main">
+        <section class="intro">
+          <p class="eyebrow">A daily word ritual</p>
+          <h1>Meet a word<br /><em>you'll remember.</em></h1>
+          <p>
+            Guess with context, not just letters. Every clue is a small lesson
+            in how language works.
+          </p>
+        </section>
+        <div class="layout">
+          <section class="game-card">
+            <div class="round-row">
+              <div class="round-label">
+                Round <span id="round">01</span> / 05
+              </div>
+              <div class="difficulty">Warm-up</div>
+            </div>
+            <div class="clue-area">
+              <div class="clue-kicker">The definition</div>
+              <div class="clue-text" id="definition">
+                A feeling of wistful affection and longing for a past time or
+                place.
+              </div>
+              <div class="clue-details">
+                <div class="detail">
+                  <span class="detail-label">Part of speech</span
+                  ><strong id="partOfSpeech">noun</strong>
+                </div>
+                <div class="detail">
+                  <span class="detail-label">Letters</span
+                  ><strong id="letterCount">09 letters</strong>
+                </div>
+                <div class="detail">
+                  <span class="detail-label">Phonetic</span
+                  ><strong id="phonetic">/nɒˈstældʒə/</strong>
+                </div>
+              </div>
+              <form class="guess-form" id="guessForm">
+                <input
+                  class="guess-input"
+                  id="guessInput"
+                  autocomplete="off"
+                  placeholder="Type your guess..."
+                  aria-label="Your word guess"
+                /><button class="primary" type="submit">Check word</button>
+              </form>
+              <div class="status" id="status" aria-live="polite">
+                You have 5 guesses. Take your best shot.
+              </div>
+            </div>
+            <div class="recap" id="recap">
+              <button class="new-round" id="newRound">Next round →</button>
+              <p class="eyebrow">Word explored</p>
+              <div class="recap-grid">
+                <div>
+                  <h3 id="recapWord">nostalgia</h3>
+                  <p id="recapOrigin">
+                    From Greek nostos, “homecoming,” and algos, “pain.”
+                  </p>
+                </div>
+                <div>
+                  <p id="recapExample">
+                    “The old photograph filled her with nostalgia for summers by
+                    the sea.”
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+          <aside class="side-stack">
+            <section class="side-card">
+              <div class="side-title">
+                <h2>Unlock clues</h2>
+                <span class="counter"
+                  ><span id="clueCount">0</span> / 3 used</span
+                >
+              </div>
+              <div class="hint-list">
+                <button class="hint" data-hint="pos">
+                  <span class="hint-icon">Aa</span
+                  ><span class="hint-copy"
+                    >Part of speech<small
+                      >Know its grammatical role</small
+                    ></span
+                  ><span class="hint-cost">− 10 pts</span></button
+                ><button class="hint" data-hint="sound">
+                  <span class="hint-icon">◖</span
+                  ><span class="hint-copy"
+                    >Hear the sound<small>Reveal its pronunciation</small></span
+                  ><span class="hint-cost">− 15 pts</span></button
+                ><button class="hint" data-hint="origin">
+                  <span class="hint-icon">✦</span
+                  ><span class="hint-copy"
+                    >Word origin<small>Trace where it began</small></span
+                  ><span class="hint-cost">− 20 pts</span>
+                </button>
+              </div>
+            </section>
+            <section class="side-card">
+              <div class="side-title">
+                <h2>Your progress</h2>
+                <span class="counter">this week</span>
+              </div>
+              <div class="progress-label">
+                <span>Words learned</span><span>12 / 20</span>
+              </div>
+              <div class="progress"><i></i></div>
+              <div style="height: 24px"></div>
+              <div class="progress-label">
+                <span>Current score</span><span id="score">420 pts</span>
+              </div>
+            </section>
+          </aside>
+        </div>
+      </main>
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>
