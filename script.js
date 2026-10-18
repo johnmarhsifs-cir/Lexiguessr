@@ -15,6 +15,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const guessInput = document.getElementById("guess-input");
   const wordDisplay = document.getElementById("word-display");
   const hintBox = document.getElementById("hint-box");
+  const hintCounter = document.getElementById("hint-counter");
+  const gameBoard = document.querySelector(".game-board");
   const modal = document.getElementById("game-modal");
   const modalWordReveal = document.getElementById("modal-word-reveal");
   const modalRestartBtn = document.getElementById("modal-restart-btn");
@@ -172,6 +174,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function renderHints() {
     const visibleHints = hints.slice(0, revealedHints + 1);
     hintBox.hidden = visibleHints.length === 0;
+    hintCounter.textContent = `${visibleHints.length} / 10`;
     hintBox.innerHTML = visibleHints
       .map(
         (hint) =>
@@ -216,6 +219,8 @@ document.addEventListener("DOMContentLoaded", () => {
       streak += 1;
       currentWordIndex += 1;
       outputMessage.textContent = "Correct!";
+      gameBoard.classList.add("correct-flash");
+      setTimeout(() => gameBoard.classList.remove("correct-flash"), 650);
 
       if (currentWordIndex >= words.length) {
         loadWords();
