@@ -107,6 +107,14 @@ document.addEventListener("DOMContentLoaded", () => {
         text: dictEntry?.fl || thesEntry?.fl || "Unknown",
       },
       {
+        category: "Syllables",
+        text: `${syllables} syllable(s)`,
+      },
+      {
+        category: "Vowels & Consonants",
+        text: `${vowels} vowel(s), ${consonants} consonant(s)`,
+      },
+      {
         category: "Plurality",
         text: isPlural ? "Plural form" : "Singular form",
       },
@@ -115,24 +123,16 @@ document.addEventListener("DOMContentLoaded", () => {
         text: getWordForm(word),
       },
       {
-        category: "Secondary Definition",
-        text: dictEntry?.shortdef?.[1] || thesEntry?.shortdef?.[0] || "None available",
-      },
-      {
         category: "Antonyms",
         text: thesEntry?.meta?.ants?.flat().slice(0, 5).join(", ") || "None available",
       },
       {
+        category: "Secondary Definition",
+        text: dictEntry?.shortdef?.[1] || thesEntry?.shortdef?.[0] || "None available",
+      },
+      {
         category: "Synonyms",
         text: thesEntry?.meta?.syns?.flat().slice(0, 5).join(", ") || "None available",
-      },
-      {
-        category: "Syllables",
-        text: `${syllables} syllable(s)`,
-      },
-      {
-        category: "Vowels & Consonants",
-        text: `${vowels} vowel(s), ${consonants} consonant(s)`,
       },
       {
         category: "First & Last Letter",

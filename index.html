@@ -11,74 +11,91 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="styles.css" />
+    <script src="theme.js"></script>
   </head>
   <body>
-    <main class="container">
-      <header class="game-header">
-        <h1 class="game-title">Lexiguessr</h1>
-      </header>
+    <header class="navbar">
+      <div class="navbar-inner">
+        <a href="index.html" class="navbar-brand">Lexiguessr</a>
+        <nav class="nav-tabs" aria-label="Main navigation">
+          <a href="index.html" class="nav-tab active">Game</a>
+          <a href="docs.html" class="nav-tab">Documentation</a>
+          <a href="about.html" class="nav-tab">About</a>
+        </nav>
+        <button id="theme-toggle" class="btn btn-outline btn-sm" type="button">Dark Mode</button>
+      </div>
+    </header>
 
-      <section class="stats-panel" aria-label="Game stats">
-        <div class="stat-card">
-          <span class="stat-label">Score</span>
-          <span id="score-display" class="stat-value">0</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-label">Streak</span>
-          <span id="streak-display" class="stat-value">0</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-label">Lives</span>
-          <span id="lives-display" class="stat-value">6</span>
-        </div>
-      </section>
-
-      <section class="game-board" aria-label="Word board">
-        <div class="word-meta">
-          <span id="word-length-info" class="meta-tag">5 Letters</span>
-          <span id="category-info" class="meta-tag">Random Word</span>
-        </div>
-
-        <div id="word-display" class="word-display" aria-live="polite"></div>
-
-        <div id="hint-box" class="hint-box"></div>
-      </section>
-
-      <section class="controls-section" aria-label="Controls and input">
-        <div class="settings-row">
-          <label for="difficulty-select" class="form-label">Difficulty:</label>
-          <select id="difficulty-select" name="difficulty" class="select-input">
-            <option value="1">Easy</option>
-            <option value="2" selected>Medium</option>
-            <option value="3">Hard</option>
-            <option value="4">Very Hard</option>
-            <option value="5">Extremely Hard</option>
-          </select>
-        </div>
-
-        <form id="guess-form" class="guess-form">
-          <div class="input-group">
-            <label for="guess-input" class="sr-only">Enter letter or word</label>
-            <input
-              type="text"
-              id="guess-input"
-              class="text-input"
-              placeholder="Type a letter or word..."
-              autocomplete="off"
-              maxlength="20"
-            />
-            <button id="submit-btn" class="btn btn-primary" type="submit">Guess</button>
+    <main class="game-layout">
+      <div class="container">
+        <section class="stats-panel" aria-label="Game stats">
+          <div class="stat-card">
+            <span class="stat-label">Score</span>
+            <span id="score-display" class="stat-value">0</span>
           </div>
-        </form>
+          <div class="stat-card">
+            <span class="stat-label">Streak</span>
+            <span id="streak-display" class="stat-value">0</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Lives</span>
+            <span id="lives-display" class="stat-value">6</span>
+          </div>
+        </section>
 
-        <div class="button-group">
-          <button id="hint-btn" class="btn btn-outline" type="button">Hint</button>
-          <button id="give-up-btn" class="btn btn-outline" type="button">Give Up</button>
-          <button id="reset-btn" class="btn btn-secondary" type="button">New Game</button>
+        <section class="game-board" aria-label="Word board">
+          <div class="word-meta">
+            <span id="word-length-info" class="meta-tag">5 Letters</span>
+            <span id="category-info" class="meta-tag">Random Word</span>
+          </div>
+
+          <div id="word-display" class="word-display" aria-live="polite"></div>
+        </section>
+
+        <section class="controls-section" aria-label="Controls and input">
+          <div class="settings-row">
+            <label for="difficulty-select" class="form-label">Difficulty</label>
+            <select id="difficulty-select" name="difficulty" class="select-input">
+              <option value="1">Easy</option>
+              <option value="2" selected>Medium</option>
+              <option value="3">Hard</option>
+              <option value="4">Very Hard</option>
+              <option value="5">Extremely Hard</option>
+            </select>
+          </div>
+
+          <form id="guess-form" class="guess-form">
+            <div class="input-group">
+              <label for="guess-input" class="sr-only">Enter letter or word</label>
+              <input
+                type="text"
+                id="guess-input"
+                class="text-input"
+                placeholder="Type a letter or word..."
+                autocomplete="off"
+                maxlength="20"
+              />
+              <button id="submit-btn" class="btn btn-primary" type="submit">Guess</button>
+            </div>
+          </form>
+
+          <div class="button-group">
+            <button id="hint-btn" class="btn btn-outline" type="button">Hint</button>
+            <button id="give-up-btn" class="btn btn-outline" type="button">Give Up</button>
+            <button id="reset-btn" class="btn btn-secondary" type="button">New Game</button>
+          </div>
+        </section>
+
+        <p id="output-message" class="output-message" role="status" aria-live="polite"></p>
+      </div>
+
+      <aside class="hints-panel" aria-label="Hints">
+        <div class="hints-header">
+          <h2 class="hints-title">Hints</h2>
+          <span id="hint-counter" class="meta-tag">1 / 10</span>
         </div>
-      </section>
-
-      <p id="output-message" class="output-message" role="status" aria-live="polite"></p>
+        <div id="hint-box" class="hint-box"></div>
+      </aside>
 
       <dialog id="game-modal" class="game-dialog">
         <div class="dialog-card">
@@ -91,6 +108,35 @@
         </div>
       </dialog>
     </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        <span class="footer-brand">Lexiguessr by Tyrone & Johnmar</span>
+        <div class="footer-links">
+          <a
+            href="https://github.com/johnmarhsifs-cir/Lexiguessr.git"
+            class="footer-link"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <svg
+              class="github-icon"
+              viewBox="0 0 24 24"
+              width="18"
+              height="18"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"
+              />
+            </svg>
+            <span>GitHub</span>
+          </a>
+        </div>
+      </div>
+    </footer>
+
     <script src="script.js"></script>
   </body>
 </html>

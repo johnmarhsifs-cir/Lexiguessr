@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Documentation - Lexiguessr</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="theme.js"></script>
+  </head>
+  <body>
+    <header class="navbar">
+      <div class="navbar-inner">
+        <a href="index.html" class="navbar-brand">Lexiguessr</a>
+        <nav class="nav-tabs" aria-label="Main navigation">
+          <a href="index.html" class="nav-tab">Game</a>
+          <a href="docs.html" class="nav-tab active">Documentation</a>
+          <a href="about.html" class="nav-tab">About</a>
+        </nav>
+        <button id="theme-toggle" class="btn btn-outline btn-sm" type="button">Dark Mode</button>
+      </div>
+    </header>
+
+    <main class="container docs-container">
+      <section class="page-content">
+        <div class="content-card">
+          <h2 class="section-title">Cover Page</h2>
+          <ul class="content-list">
+            <li><strong>Project Title:</strong> Lexiguessr</li>
+            <li><strong>Members:</strong> Johnmar A. Ylarde, Tyrone Alog</li>
+            <li><strong>Course &amp; Section:</strong> BSIT 2A</li>
+            <li><strong>Instructor:</strong> Arianne Joy Cari-an</li>
+            <li><strong>Date:</strong> October 18, 2026</li>
+          </ul>
+        </div>
+
+        <div class="content-card">
+          <h2 class="section-title">Project Overview</h2>
+          <p class="section-text">
+            Lexiguessr is a web-based word-guessing game that gives players dictionary and thesaurus
+            hints to help them guess a hidden word while improving their vocabulary.
+          </p>
+        </div>
+
+        <div class="content-card">
+          <h2 class="section-title">Objectives</h2>
+          <ul class="content-list">
+            <li>Build a simple word-guessing game using HTML, CSS, and JavaScript.</li>
+            <li>Fetch random words, definitions, and synonyms using public APIs.</li>
+            <li>Provide a clean, minimalist user interface with Light and Dark modes.</li>
+          </ul>
+        </div>
+
+        <div class="content-card">
+          <h2 class="section-title">Target Users</h2>
+          <ul class="content-list">
+            <li>Students and language learners practicing vocabulary.</li>
+            <li>Casual players who enjoy word puzzle games.</li>
+          </ul>
+        </div>
+
+        <div class="content-card">
+          <h2 class="section-title">Features</h2>
+          <ul class="content-list">
+            <li><strong>5 Difficulty Levels:</strong> 5 to 12 letter words.</li>
+            <li><strong>10 Progressive Hints:</strong> Definitions, grammar, and letter clues.</li>
+            <li><strong>Game Stats:</strong> Tracks score, streak, and 6 lives.</li>
+            <li><strong>Theme Toggle:</strong> Switches between Light and Dark mode.</li>
+          </ul>
+        </div>
+
+        <div class="content-card">
+          <h2 class="section-title">Technologies Used</h2>
+          <ul class="content-list">
+            <li><strong>HTML, CSS, JavaScript</strong></li>
+            <li>
+              <strong>APIs:</strong> Random Word API, Merriam-Webster Dictionary &amp; Thesaurus
+              APIs
+            </li>
+            <li><strong>Deployment:</strong> GitHub Pages</li>
+          </ul>
+        </div>
+
+        <div class="content-card">
+          <h2 class="section-title">System Design</h2>
+          <p class="section-text"><strong>Wireframe:</strong></p>
+          <pre class="code-block">
+[ Navbar: Lexiguessr | Game | Documentation | About | Theme ]
++-----------------------------+  +--------------------------+
+| [Score]  [Streak]  [Lives]  |  | Hints                    |
+|                             |  | ------------------------ |
+|     [_] [_] [_] [_] [_]     |  | [Definition]             |
+|                             |  | [Part of Speech]         |
+| Difficulty: [ Medium     ]  |  | [Syllables]              |
+| [ Guess Input    ] [Guess]  |  |                          |
+| [Hint] [Give Up] [New Game] |  |                          |
++-----------------------------+  +--------------------------+
+[ Footer: Lexiguessr by Tyrone &amp; Johnmar             GitHub ]</pre
+          >
+          <p class="section-text">
+            <strong>User Flow:</strong> Start Game &rarr; Fetch Word &amp; Hints &rarr; Guess
+            Letter/Word or Use Hint &rarr; Update Score/Lives &rarr; Next Word or Game Over.
+          </p>
+        </div>
+
+        <div class="content-card">
+          <h2 class="section-title">API Integration</h2>
+          <ul class="content-list">
+            <li>
+              <strong>Random Word API:</strong> Retrieves 5 random words based on selected
+              difficulty and word length.
+            </li>
+            <li>
+              <strong>Merriam-Webster Collegiate &amp; Thesaurus APIs:</strong> Retrieves the word's
+              definition, part of speech, syllables, synonyms, and antonyms to build the game hints.
+            </li>
+          </ul>
+          <pre class="code-block">
+const response = await fetch(
+  `https://random-word-api.herokuapp.com/word?number=5&amp;diff=${difficulty.value}&amp;length=${length}`
+);
+const [dictRes, thesRes] = await Promise.all([
+  fetch(`https://www.dictionaryapi.com/api/v3/references/collegiate/json/${word}?key=${COLLEGIATE_KEY}`),
+  fetch(`https://www.dictionaryapi.com/api/v3/references/thesaurus/json/${word}?key=${THESAURUS_KEY}`)
+]);</pre
+          >
+        </div>
+
+        <div class="content-card">
+          <h2 class="section-title">Website Screenshots</h2>
+          <ul class="content-list">
+            <li>
+              <strong>Game View:</strong> Displays stats, letter tiles, controls, and the hints
+              panel.
+            </li>
+            <li>
+              <strong>Light &amp; Dark Themes:</strong> Minimalist monochrome interface in both
+              modes.
+            </li>
+            <li><strong>Game Over Modal:</strong> Reveals the correct word when lives reach 0.</li>
+          </ul>
+        </div>
+
+        <div class="content-card">
+          <h2 class="section-title">Testing</h2>
+          <table class="doc-table">
+            <thead>
+              <tr>
+                <th>Feature</th>
+                <th>Action</th>
+                <th>Result</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Load Word</td>
+                <td>Start or reset game</td>
+                <td>Displays blank tiles and first hint</td>
+                <td>Pass</td>
+              </tr>
+              <tr>
+                <td>Correct Guess</td>
+                <td>Enter matching letter or word</td>
+                <td>Reveals letters and adds score</td>
+                <td>Pass</td>
+              </tr>
+              <tr>
+                <td>Wrong Guess</td>
+                <td>Enter wrong letter or word</td>
+                <td>Deducts 1 life and resets streak</td>
+                <td>Pass</td>
+              </tr>
+              <tr>
+                <td>Hint Button</td>
+                <td>Click Hint</td>
+                <td>Displays next hint on the right panel</td>
+                <td>Pass</td>
+              </tr>
+              <tr>
+                <td>Theme Button</td>
+                <td>Click Dark / Light Mode</td>
+                <td>Switches theme across all pages</td>
+                <td>Pass</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="content-card">
+          <h2 class="section-title">Problems Encountered and Solutions</h2>
+          <p class="section-text">
+            <strong>Problem:</strong> We had a hard time finding and navigating the output of the
+            Thesaurus and Collegiate Dictionary APIs because the JSON data was very large. We also
+            had difficulty deciding what to include as hints.<br />
+            <strong>Solution:</strong> We studied the API structure, selected simple and clear
+            hints, and stored them in an array that matched the structure of the API output.
+          </p>
+        </div>
+
+        <div class="content-card">
+          <h2 class="section-title">Conclusion</h2>
+          <p class="section-text">
+            Our pair successfully created Lexiguessr, a minimalist word-guessing web app that
+            integrates multiple APIs to turn dictionary and thesaurus data into interactive game
+            hints.
+          </p>
+        </div>
+
+        <div class="content-card">
+          <h2 class="section-title">References</h2>
+          <ul class="content-list">
+            <li>Merriam-Webster Dictionary &amp; Thesaurus APIs</li>
+            <li>Random Word API</li>
+            <li>MDN Web Docs, W3Schools, Stack Overflow, GeeksforGeeks</li>
+            <li>Large Language Models (LLMs)</li>
+          </ul>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        <span class="footer-brand">Lexiguessr by Tyrone &amp; Johnmar</span>
+        <div class="footer-links">
+          <a
+            href="https://github.com/johnmarhsifs-cir/Lexiguessr.git"
+            class="footer-link"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <svg
+              class="github-icon"
+              viewBox="0 0 24 24"
+              width="18"
+              height="18"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"
+              />
+            </svg>
+            <span>GitHub</span>
+          </a>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>
