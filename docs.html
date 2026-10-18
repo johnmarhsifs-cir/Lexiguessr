@@ -71,6 +71,8 @@
             <li><strong>10 Progressive Hints:</strong> Definitions, grammar, and letter clues.</li>
             <li><strong>Game Stats:</strong> Tracks score, streak, and 6 lives.</li>
             <li><strong>Theme Toggle:</strong> Switches between Light and Dark mode.</li>
+            <li><strong>Guess History:</strong> Shows previously guessed letters and prevents duplicate letter guesses from costing a life.</li>
+            <li><strong>Personal Wordbook:</strong> After guessing a word correctly, save it with its definition, part of speech, and synonyms in this browser.</li>
           </ul>
         </div>
 
@@ -186,6 +188,18 @@ const [dictRes, thesRes] = await Promise.all([
                 <td>Click Dark / Light Mode</td>
                 <td>Switches theme across all pages</td>
                 <td>Pass</td>
+              </tr>
+              <tr>
+                <td>Guess History</td>
+                <td>Guess letters, including a repeated letter</td>
+                <td>Shows each tried letter; a repeated guess does not cost a life</td>
+                <td>Implemented</td>
+              </tr>
+              <tr>
+                <td>Wordbook</td>
+                <td>Guess a word correctly, save it, then reopen Wordbook</td>
+                <td>Shows saved vocabulary after reload in the same browser</td>
+                <td>Implemented</td>
               </tr>
             </tbody>
           </table>

@@ -49,6 +49,10 @@
           </div>
 
           <div id="word-display" class="word-display" aria-live="polite"></div>
+          <div class="guess-history-section" aria-label="Guess history">
+            <span class="guess-history-label">Guessed letters</span>
+            <div id="guess-history" class="guess-history" aria-live="polite"></div>
+          </div>
         </section>
 
         <section class="controls-section" aria-label="Controls and input">
@@ -79,7 +83,7 @@
           </form>
 
           <div class="button-group">
-            <button id="hint-btn" class="btn btn-outline" type="button">Hint</button>
+            <button id="hint-btn" class="btn btn-outline" type="button">Hint 🔎︎</button>
             <button id="give-up-btn" class="btn btn-outline" type="button">Give Up</button>
             <button id="reset-btn" class="btn btn-secondary" type="button">New Game</button>
           </div>
@@ -94,6 +98,11 @@
           <span id="hint-counter" class="meta-tag">1 / 10</span>
         </div>
         <div id="hint-box" class="hint-box"></div>
+        <div class="wordbook-controls">
+          <button id="save-word-btn" class="btn btn-outline" type="button" disabled hidden>Save Word</button>
+          <button id="wordbook-open-btn" class="btn btn-secondary" type="button">Wordbook ✎𓂃</button>
+          <button id="next-word-btn" class="btn btn-primary" type="button" hidden>Next Word</button>
+        </div>
       </aside>
 
       <dialog id="game-modal" class="game-dialog">
@@ -104,6 +113,19 @@
             <p>The word was: <strong id="modal-word-reveal"></strong></p>
           </div>
           <button id="modal-restart-btn" class="btn btn-primary" type="button">Play Again</button>
+        </div>
+      </dialog>
+
+      <dialog id="wordbook-modal" class="game-dialog">
+        <div class="dialog-card wordbook-dialog-card">
+          <h2 class="modal-title">My Wordbook</h2>
+          <p id="wordbook-count" class="modal-desc"></p>
+          <p id="wordbook-empty" class="modal-desc">No saved words yet.</p>
+          <ul id="wordbook-list" class="wordbook-list"></ul>
+          <div class="wordbook-actions">
+            <button id="wordbook-clear-btn" class="btn btn-outline" type="button">Clear Wordbook</button>
+            <button id="wordbook-close-btn" class="btn btn-primary" type="button">Close</button>
+          </div>
         </div>
       </dialog>
     </main>

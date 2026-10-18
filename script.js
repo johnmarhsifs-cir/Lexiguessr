@@ -14,8 +14,19 @@ document.addEventListener("DOMContentLoaded", () => {
   const guessForm = document.getElementById("guess-form");
   const guessInput = document.getElementById("guess-input");
   const wordDisplay = document.getElementById("word-display");
+  const guessHistoryDisplay = document.getElementById("guess-history");
   const hintBox = document.getElementById("hint-box");
   const hintCounter = document.getElementById("hint-counter");
+  const saveWordBtn = document.getElementById("save-word-btn");
+  const nextWordBtn = document.getElementById("next-word-btn");
+  const submitBtn = document.getElementById("submit-btn");
+  const wordbookOpenBtn = document.getElementById("wordbook-open-btn");
+  const wordbookModal = document.getElementById("wordbook-modal");
+  const wordbookList = document.getElementById("wordbook-list");
+  const wordbookEmpty = document.getElementById("wordbook-empty");
+  const wordbookCount = document.getElementById("wordbook-count");
+  const wordbookClearBtn = document.getElementById("wordbook-clear-btn");
+  const wordbookCloseBtn = document.getElementById("wordbook-close-btn");
   const gameBoard = document.querySelector(".game-board");
   const modal = document.getElementById("game-modal");
   const modalWordReveal = document.getElementById("modal-word-reveal");
@@ -25,16 +36,39 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentWordIndex = 0;
   let currentWord = "";
   let revealedLetters = [];
+  let guessedLetters = new Set();
+  let isWordSolved = false;
   let hints = [];
   let revealedHints = 0;
   let score = 0;
   let streak = 0;
   let lives = 6;
+  let wordbook = loadWordbook();
+
+  function loadWordbook() {
+    try {
+      const savedWords = JSON.parse(localStorage.getItem("lexiguessr-wordbook") || "[]");
+      return Array.isArray(savedWords) ? savedWords : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function saveWordbook() {
+    try {
+      localStorage.setItem("lexiguessr-wordbook", JSON.stringify(wordbook));
+      return true;
+    } catch {
+      outputMessage.textContent = "Could not save your wordbook in this browser.";
+      return false;
+    }
+  }
 
   function resetGame() {
     score = 0;
     streak = 0;
     lives = 6;
+    isWordSolved = false;
     loadWords();
   }
 
@@ -59,6 +93,8 @@ document.addEventListener("DOMContentLoaded", () => {
   async function startWord() {
     currentWord = (words[currentWordIndex] || "").toLowerCase();
     revealedLetters = Array(currentWord.length).fill("");
+    guessedLetters = new Set();
+    isWordSolved = false;
     revealedHints = 0;
     hints = [];
     updateBoard();
@@ -158,7 +194,14 @@ document.addEventListener("DOMContentLoaded", () => {
     livesDisplay.textContent = lives;
     wordLengthInfo.textContent = currentWord ? `${currentWord.length} Letters` : "";
     renderWord();
+    renderGuessHistory();
     renderHints();
+    updateSaveWordButton();
+    const inputsDisabled = !currentWord || lives <= 0 || isWordSolved;
+    guessInput.disabled = inputsDisabled;
+    submitBtn.disabled = inputsDisabled;
+    hintBtn.disabled = inputsDisabled;
+    giveUpBtn.disabled = inputsDisabled;
   }
 
   function renderWord() {
@@ -171,6 +214,24 @@ document.addEventListener("DOMContentLoaded", () => {
       .join("");
   }
 
+  function renderGuessHistory() {
+    guessHistoryDisplay.replaceChildren();
+    if (guessedLetters.size === 0) {
+      const emptyMessage = document.createElement("span");
+      emptyMessage.className = "guess-history-empty";
+      emptyMessage.textContent = "None yet";
+      guessHistoryDisplay.append(emptyMessage);
+      return;
+    }
+
+    guessedLetters.forEach((letter) => {
+      const guess = document.createElement("span");
+      guess.className = `guess-chip ${currentWord.includes(letter) ? "correct" : "incorrect"}`;
+      guess.textContent = letter.toUpperCase();
+      guessHistoryDisplay.append(guess);
+    });
+  }
+
   function renderHints() {
     const visibleHints = hints.slice(0, revealedHints + 1);
     hintBox.hidden = visibleHints.length === 0;
@@ -181,6 +242,64 @@ document.addEventListener("DOMContentLoaded", () => {
           `<div class="hint-item"><span class="hint-badge">${hint.category}</span><span class="hint-text">${hint.text}</span></div>`,
       )
       .join("");
+  }
+
+  function updateSaveWordButton() {
+    if (!saveWordBtn) return;
+    const alreadySaved = wordbook.some((entry) => entry.word === currentWord);
+    saveWordBtn.hidden = !isWordSolved;
+    saveWordBtn.disabled = !isWordSolved || !hints.length || alreadySaved;
+    saveWordBtn.textContent = alreadySaved ? "Saved" : "Save Word";
+    nextWordBtn.hidden = !isWordSolved;
+  }
+
+  function renderWordbook() {
+    wordbookList.replaceChildren();
+    wordbookCount.textContent = `${wordbook.length} saved ${wordbook.length === 1 ? "word" : "words"}`;
+    wordbookEmpty.hidden = wordbook.length > 0;
+
+    wordbook.forEach((entry) => {
+      const item = document.createElement("li");
+      item.className = "wordbook-entry";
+
+      const title = document.createElement("strong");
+      title.textContent = entry.word;
+      item.append(title);
+
+      const definition = document.createElement("p");
+      definition.textContent = entry.definition;
+      item.append(definition);
+
+      if (entry.partOfSpeech || entry.synonyms) {
+        const details = document.createElement("p");
+        details.className = "wordbook-details";
+        details.textContent = [entry.partOfSpeech, entry.synonyms].filter(Boolean).join(" · ");
+        item.append(details);
+      }
+
+      wordbookList.append(item);
+    });
+  }
+
+  function saveCurrentWord() {
+    if (!isWordSolved || !currentWord || !hints.length || wordbook.some((entry) => entry.word === currentWord)) return;
+
+    const getHint = (category) => hints.find((hint) => hint.category === category)?.text || "";
+    wordbook.unshift({
+      word: currentWord,
+      definition: getHint("Definition"),
+      partOfSpeech: getHint("Part of Speech"),
+      synonyms: getHint("Synonyms"),
+    });
+
+    if (!saveWordbook()) {
+      wordbook.shift();
+      return;
+    }
+
+    renderWordbook();
+    updateSaveWordButton();
+    outputMessage.textContent = `Saved “${currentWord}” to your wordbook.`;
   }
 
   function revealGuess(guess) {
@@ -212,23 +331,25 @@ document.addEventListener("DOMContentLoaded", () => {
     event.preventDefault();
     const guess = guessInput.value.trim().toLowerCase();
     guessInput.value = "";
-    if (!guess || !currentWord || lives <= 0) return;
+    if (!guess || !currentWord || lives <= 0 || isWordSolved) return;
+
+    if (guess.length === 1 && guessedLetters.has(guess)) {
+      outputMessage.textContent = `You already guessed “${guess}”.`;
+      return;
+    }
+
+    if (guess.length === 1) guessedLetters.add(guess);
 
     const matched = revealGuess(guess);
 
     if (revealedLetters.join("") === currentWord) {
       score += Math.max(0, 10 - revealedHints);
       streak += 1;
-      currentWordIndex += 1;
-      outputMessage.textContent = "Correct!";
+      isWordSolved = true;
+      outputMessage.textContent = "Correct! Save this word or continue to the next one.";
       gameBoard.classList.add("correct-flash");
       setTimeout(() => gameBoard.classList.remove("correct-flash"), 650);
-
-      if (currentWordIndex >= words.length) {
-        loadWords();
-      } else {
-        startWord();
-      }
+      updateBoard();
       return;
     }
 
@@ -250,7 +371,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   hintBtn.addEventListener("click", () => {
-    if (lives <= 0 || !currentWord || !hints.length) return;
+    if (lives <= 0 || !currentWord || !hints.length || isWordSolved) return;
 
     if (revealedHints >= hints.length - 1) {
       outputMessage.textContent = "All hints revealed!";
@@ -263,7 +384,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   giveUpBtn.addEventListener("click", () => {
-    if (!currentWord) return;
+    if (!currentWord || isWordSolved) return;
     modalWordReveal.textContent = currentWord;
     modal.showModal();
   });
@@ -277,6 +398,34 @@ document.addEventListener("DOMContentLoaded", () => {
 
   difficulty.addEventListener("change", resetGame);
 
+  saveWordBtn.addEventListener("click", saveCurrentWord);
+  nextWordBtn.addEventListener("click", () => {
+    if (!isWordSolved) return;
+    currentWordIndex += 1;
+    if (currentWordIndex >= words.length) {
+      loadWords();
+    } else {
+      startWord();
+    }
+  });
+  wordbookOpenBtn.addEventListener("click", () => {
+    renderWordbook();
+    wordbookModal.showModal();
+  });
+  wordbookCloseBtn.addEventListener("click", () => wordbookModal.close());
+  wordbookClearBtn.addEventListener("click", () => {
+    if (!wordbook.length) return;
+    const previousWordbook = wordbook;
+    wordbook = [];
+    if (!saveWordbook()) {
+      wordbook = previousWordbook;
+      return;
+    }
+    renderWordbook();
+    updateSaveWordButton();
+  });
+
+  renderWordbook();
   resetGame();
 });
 
