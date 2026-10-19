@@ -200,6 +200,8 @@ body {
 }
 
 .game-layout .container {
+  position: relative;
+  overflow: hidden;
   margin: 0;
   width: 100%;
 }
@@ -286,6 +288,15 @@ body {
   gap: 1.15rem;
 }
 
+.yuyu-gif {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 5;
+}
+
 .word-meta {
   display: flex;
   justify-content: center;
@@ -311,67 +322,6 @@ body {
   flex-wrap: wrap;
   gap: 0.45rem;
   min-height: 3.6rem;
-}
-
-.guess-history-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.4rem;
-}
-
-.guess-history-label {
-  color: var(--text-muted);
-  font-size: 0.7rem;
-  font-weight: 700;
-  text-transform: uppercase;
-}
-
-.guess-history {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 0.3rem;
-  min-height: 1.6rem;
-}
-
-.guess-history-empty {
-  color: var(--text-muted);
-  font-size: 0.8rem;
-}
-
-.guess-chip {
-  min-width: 1.65rem;
-  padding: 0.1rem 0.35rem;
-  border: 1px solid var(--border);
-  border-radius: 5px;
-  font-size: 0.78rem;
-  font-weight: 800;
-  line-height: 1.35;
-}
-
-.guess-chip.correct {
-  color: #166534;
-  background: #dcfce7;
-  border-color: #86efac;
-}
-
-.guess-chip.incorrect {
-  color: #991b1b;
-  background: #fee2e2;
-  border-color: #fca5a5;
-}
-
-[data-theme="dark"] .guess-chip.correct {
-  color: #bbf7d0;
-  background: #14532d;
-  border-color: #166534;
-}
-
-[data-theme="dark"] .guess-chip.incorrect {
-  color: #fecaca;
-  background: #7f1d1d;
-  border-color: #991b1b;
 }
 
 .letter-tile {
@@ -469,7 +419,7 @@ body {
 
   .game-layout .container,
   .hints-panel {
-    position: static;
+    position: relative;
     max-height: none;
     max-width: 420px;
   }
@@ -718,6 +668,14 @@ body {
   line-height: 1.6;
   color: var(--text);
   overflow-x: auto;
+}
+
+.wireframe-img {
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  display: block;
 }
 
 .doc-table {

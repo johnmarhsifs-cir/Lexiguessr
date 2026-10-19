@@ -52,7 +52,6 @@
           <ul class="content-list">
             <li>Build a simple word-guessing game using HTML, CSS, and JavaScript.</li>
             <li>Fetch random words, definitions, and synonyms using public APIs.</li>
-            <li>Provide a clean user interface with Light and Dark modes.</li>
           </ul>
         </div>
 
@@ -70,9 +69,7 @@
             <li><strong>5 Difficulty Levels:</strong> 5 to 12 letter words.</li>
             <li><strong>10 Progressive Hints:</strong> Definitions, grammar, and letter clues.</li>
             <li><strong>Game Stats:</strong> Tracks score, streak, and 6 lives.</li>
-            <li><strong>Theme Toggle:</strong> Switches between Light and Dark mode.</li>
-            <li><strong>Guess History:</strong> Shows previously guessed letters and prevents duplicate letter guesses from costing a life.</li>
-            <li><strong>Personal Wordbook:</strong> After guessing a word correctly, save it with its definition, part of speech, and synonyms in this browser.</li>
+            <li><strong>Wordbook:</strong> Saves solved words with their definition, part of speech, and synonyms.</li>
           </ul>
         </div>
 
@@ -91,22 +88,11 @@
         <div class="content-card">
           <h2 class="section-title">System Design</h2>
           <p class="section-text"><strong>Wireframe:</strong></p>
-          <pre class="code-block">
-[ Navbar: Lexiguessr | Game | Documentation | About | Theme ]
-+-----------------------------+  +--------------------------+
-| [Score]  [Streak]  [Lives]  |  | Hints                    |
-|                             |  | ------------------------ |
-|     [_] [_] [_] [_] [_]     |  | [Definition]             |
-|                             |  | [Part of Speech]         |
-| Difficulty: [ Medium     ]  |  | [Syllables]              |
-| [ Guess Input    ] [Guess]  |  |                          |
-| [Hint] [Give Up] [New Game] |  |                          |
-+-----------------------------+  +--------------------------+
-[ Footer: Lexiguessr by Tyrone &amp; Johnmar             GitHub ]</pre
-          >
+          <img src="Images/Wireframe.jpg" alt="Lexiguessr Wireframe" class="wireframe-img" />
           <p class="section-text">
             <strong>User Flow:</strong> Start Game &rarr; Fetch Word &amp; Hints &rarr; Guess
-            Letter/Word or Use Hint &rarr; Update Score/Lives &rarr; Next Word or Game Over.
+            Letter/Word or Use Hint &rarr; Update Score/Lives &rarr; Save Word / Next Word or Game
+            Over.
           </p>
         </div>
 
@@ -131,20 +117,6 @@ const [dictRes, thesRes] = await Promise.all([
   fetch(`https://www.dictionaryapi.com/api/v3/references/thesaurus/json/${word}?key=${THESAURUS_KEY}`)
 ]);</pre
           >
-        </div>
-
-        <div class="content-card">
-          <h2 class="section-title">Website Screenshots</h2>
-          <ul class="content-list">
-            <li>
-              <strong>Game View:</strong> Displays stats, letter tiles, controls, and the hints
-              panel.
-            </li>
-            <li>
-              <strong>Light &amp; Dark Themes:</strong> Clean interface in both modes.
-            </li>
-            <li><strong>Game Over Modal:</strong> Reveals the correct word when lives reach 0.</li>
-          </ul>
         </div>
 
         <div class="content-card">
@@ -184,22 +156,10 @@ const [dictRes, thesRes] = await Promise.all([
                 <td>Pass</td>
               </tr>
               <tr>
-                <td>Theme Button</td>
-                <td>Click Dark / Light Mode</td>
-                <td>Switches theme across all pages</td>
-                <td>Pass</td>
-              </tr>
-              <tr>
-                <td>Guess History</td>
-                <td>Guess letters, including a repeated letter</td>
-                <td>Shows each tried letter; a repeated guess does not cost a life</td>
-                <td>Implemented</td>
-              </tr>
-              <tr>
                 <td>Wordbook</td>
-                <td>Guess a word correctly, save it, then reopen Wordbook</td>
-                <td>Shows saved vocabulary after reload in the same browser</td>
-                <td>Implemented</td>
+                <td>Click Save Word and open Wordbook</td>
+                <td>Saves and displays solved words</td>
+                <td>Pass</td>
               </tr>
             </tbody>
           </table>
