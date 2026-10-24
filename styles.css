@@ -14,9 +14,7 @@
   --primary-shadow: #991b1b;
   --accent-text: #dc2626;
   --ring: rgba(220, 38, 38, 0.28);
-  --shadow:
-    0 2px 4px rgba(28, 25, 23, 0.05),
-    0 12px 32px -8px rgba(28, 25, 23, 0.08);
+  --shadow: 0 2px 4px rgba(28, 25, 23, 0.05), 0 12px 32px -8px rgba(28, 25, 23, 0.08);
 }
 
 [data-theme="dark"] {
@@ -35,9 +33,7 @@
   --primary-shadow: #991b1b;
   --accent-text: #ef4444;
   --ring: rgba(239, 68, 68, 0.3);
-  --shadow:
-    0 2px 4px rgba(0, 0, 0, 0.4),
-    0 16px 36px -8px rgba(0, 0, 0, 0.6);
+  --shadow: 0 2px 4px rgba(0, 0, 0, 0.4), 0 16px 36px -8px rgba(0, 0, 0, 0.6);
 }
 
 *,
@@ -69,6 +65,7 @@
 
 ::-webkit-scrollbar-thumb:active {
   background: var(--primary-hover);
+  transform: translateX(0);
 }
 
 html {
@@ -173,6 +170,7 @@ body {
 }
 
 .game-layout {
+  z-index: 1;
   max-width: 860px;
   width: calc(100% - 2rem);
   margin: auto;
@@ -200,6 +198,7 @@ body {
 }
 
 .game-layout .container {
+  overflow: visible !important;
   position: relative;
   overflow: hidden;
   margin: 0;
@@ -244,8 +243,9 @@ body {
 }
 
 .stats-panel {
+  grid-template-columns: repeat(3, 1fr) !important;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 0.55rem;
 }
 
@@ -288,13 +288,65 @@ body {
   gap: 1.15rem;
 }
 
+.game-layout .container::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--surface);
+  border-radius: inherit;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.game-layout .container > :not(.wordbook-bookmark):not(.yuyu-gif) {
+  position: relative;
+  z-index: 1;
+}
+
 .yuyu-gif {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-radius: inherit;
   z-index: 5;
+}
+
+.btn.wordbook-bookmark {
+  position: absolute;
+  top: 1.5rem;
+  right: 100%;
+  padding: 0.6rem 0.9rem 0.6rem 1.6rem;
+  background: var(--primary);
+  color: var(--primary-fg);
+  border: none;
+  border-radius: 0;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 14px 50%);
+
+
+  box-shadow: var(--shadow);
+  gap: 0.75rem;
+  white-space: nowrap;
+  z-index: -1;
+  transform: translateX(calc(100% - 3.85rem));
+
+  transition:
+    transform 0.25s ease,
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.btn.wordbook-bookmark:hover,
+.btn.wordbook-bookmark:focus-visible {
+  background: var(--primary-hover);
+  transform: translateX(0);
+
+}
+
+.btn.wordbook-bookmark:active {
+  transform: translateX(0) scale(0.98);
 }
 
 .word-meta {
@@ -412,6 +464,7 @@ body {
 
 @media (max-width: 768px) {
   .game-layout {
+    z-index: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -519,7 +572,7 @@ body {
 }
 
 .btn:active {
-  transform: scale(0.98);
+  transform: translateX(0) scale(0.98);
 }
 
 .btn-sm {
@@ -536,6 +589,7 @@ body {
 
 .btn-primary:hover {
   background: var(--primary-hover);
+  transform: translateX(0);
 }
 
 .btn-secondary {
@@ -564,7 +618,7 @@ body {
 
 .button-group {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 0.45rem;
 }
 
@@ -760,7 +814,7 @@ body {
 }
 
 .game-dialog::backdrop {
-  background: rgba(4, 23, 23, 0.65);
+  background: transparent;
   backdrop-filter: blur(4px);
 }
 

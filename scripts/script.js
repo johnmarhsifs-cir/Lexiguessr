@@ -82,6 +82,7 @@ function updateBoard() {
   renderHints();
 
   const isSaved = wordbook.some((item) => item.word === currentWord);
+  hintBtn.hidden = isWordSolved;
   saveWordBtn.hidden = !isWordSolved;
   saveWordBtn.disabled = isSaved;
   saveWordBtn.textContent = isSaved ? "Saved" : "Save Word";
