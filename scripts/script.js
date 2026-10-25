@@ -12,7 +12,6 @@ const streakDisplay = document.getElementById("streak-display");
 const livesDisplay = document.getElementById("lives-display");
 const wordLengthInfo = document.getElementById("word-length-info");
 const guessForm = document.getElementById("guess-form");
-const guessInput = document.getElementById("guess-input");
 const wordDisplay = document.getElementById("word-display");
 const hintBox = document.getElementById("hint-box");
 const hintCounter = document.getElementById("hint-counter");
@@ -26,6 +25,7 @@ const wordbookCloseBtn = document.getElementById("wordbook-close-btn");
 const gameBoard = document.querySelector(".game-board");
 const modal = document.getElementById("game-modal");
 const modalWordReveal = document.getElementById("modal-word-reveal");
+const modalSaveBtn = document.getElementById("modal-save-btn");
 const modalRestartBtn = document.getElementById("modal-restart-btn");
 
 let words = [];
@@ -74,11 +74,13 @@ async function startWord() {
 }
 
 function updateBoard() {
+  const inputsDisabled = !currentWord || lives <= 0 || isWordSolved;
+
   scoreDisplay.textContent = score;
   streakDisplay.textContent = streak;
   livesDisplay.textContent = lives;
   wordLengthInfo.textContent = currentWord ? `${currentWord.length} Letters` : "";
-  renderWord();
+  renderWord(inputsDisabled);
   renderHints();
 
   const isSaved = wordbook.some((item) => item.word === currentWord);
@@ -86,21 +88,21 @@ function updateBoard() {
   saveWordBtn.hidden = !isWordSolved;
   saveWordBtn.disabled = isSaved;
   saveWordBtn.textContent = isSaved ? "Saved" : "Save Word";
+  modalSaveBtn.disabled = isSaved;
+  modalSaveBtn.textContent = isSaved ? "Saved" : "Save Word";
   nextWordBtn.hidden = !isWordSolved;
 
-  const inputsDisabled = !currentWord || lives <= 0 || isWordSolved;
-  guessInput.disabled = inputsDisabled;
   submitBtn.disabled = inputsDisabled;
   hintBtn.disabled = inputsDisabled;
   giveUpBtn.disabled = inputsDisabled;
 }
 
-function renderWord() {
+function renderWord(inputsDisabled) {
   wordDisplay.innerHTML = revealedLetters
-    .map((letter) =>
+    .map((letter, index) =>
       letter
-        ? `<span class="letter-tile">${letter}</span>`
-        : '<span class="letter-tile empty">_</span>',
+        ? `<input type="text" class="letter-tile" value="${letter}" disabled />`
+        : `<input type="text" class="letter-tile empty" data-index="${index}" maxlength="1" placeholder="" autocomplete="off" ${inputsDisabled ? "disabled" : ""} />`,
     )
     .join("");
 }
@@ -117,21 +119,21 @@ function renderHints() {
     .join("");
 }
 
-function revealGuess(guess) {
-  const chars = guess.split("");
+function revealGuess(entries) {
   let matched = false;
 
-  if (chars.length === 1) {
+  if (entries.length === 1) {
+    const char = entries[0].char;
     for (let i = 0; i < currentWord.length; i++) {
-      if (currentWord[i] === chars[0]) {
+      if (currentWord[i] === char) {
         revealedLetters[i] = currentWord[i];
         matched = true;
       }
     }
   } else {
-    for (let i = 0; i < currentWord.length; i++) {
-      if (chars[i] === currentWord[i]) {
-        revealedLetters[i] = currentWord[i];
+    for (const { index, char } of entries) {
+      if (currentWord[index] === char) {
+        revealedLetters[index] = currentWord[index];
         matched = true;
       }
     }
@@ -140,13 +142,40 @@ function revealGuess(guess) {
   return matched;
 }
 
+wordDisplay.addEventListener("input", (event) => {
+  if (!event.target.value) return;
+  const enabled = [...wordDisplay.querySelectorAll("input:not(:disabled)")];
+  const next = enabled[enabled.indexOf(event.target) + 1];
+  next?.focus();
+});
+
+wordDisplay.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    guessForm.requestSubmit();
+    return;
+  }
+  if (event.key === "Backspace" && !event.target.value) {
+    const enabled = [...wordDisplay.querySelectorAll("input:not(:disabled)")];
+    const prev = enabled[enabled.indexOf(event.target) - 1];
+    prev?.focus();
+  }
+});
+
 guessForm.addEventListener("submit", (event) => {
   event.preventDefault();
-  const guess = guessInput.value.trim().toLowerCase();
-  guessInput.value = "";
-  if (!guess || !currentWord || lives <= 0 || isWordSolved) return;
+  if (!currentWord || lives <= 0 || isWordSolved) return;
 
-  const matched = revealGuess(guess);
+  const entries = [...wordDisplay.querySelectorAll("input:not(:disabled)")]
+    .map((input) => ({
+      index: Number(input.dataset.index),
+      char: input.value.trim().toLowerCase(),
+    }))
+    .filter((entry) => entry.char);
+
+  if (!entries.length) return;
+
+  const matched = revealGuess(entries);
 
   if (revealedLetters.join("") === currentWord) {
     score += Math.max(0, 10 - revealedHints);
@@ -159,9 +188,10 @@ guessForm.addEventListener("submit", (event) => {
     return;
   }
 
-  if (guess.length === 1 && matched) {
+  if (entries.length === 1 && matched) {
     outputMessage.textContent = "Good guess!";
     updateBoard();
+    wordDisplay.querySelector("input:not(:disabled)")?.focus();
     return;
   }
 
@@ -173,6 +203,8 @@ guessForm.addEventListener("submit", (event) => {
   if (lives <= 0) {
     modalWordReveal.textContent = currentWord;
     modal.showModal();
+  } else {
+    wordDisplay.querySelector("input:not(:disabled)")?.focus();
   }
 });
 
@@ -204,11 +236,14 @@ modalRestartBtn.addEventListener("click", () => {
 
 difficulty.addEventListener("change", resetGame);
 
-saveWordBtn.addEventListener("click", () => {
+function handleSaveWord() {
   saveWord(currentWord, hints);
   outputMessage.textContent = `Saved "${currentWord}" to your wordbook.`;
   updateBoard();
-});
+}
+
+saveWordBtn.addEventListener("click", handleSaveWord);
+modalSaveBtn.addEventListener("click", handleSaveWord);
 
 nextWordBtn.addEventListener("click", () => {
   currentWordIndex += 1;

@@ -77,18 +77,7 @@
           </div>
 
           <form id="guess-form" class="guess-form">
-            <div class="input-group">
-              <label for="guess-input" class="sr-only">Enter letter or word</label>
-              <input
-                type="text"
-                id="guess-input"
-                class="text-input"
-                placeholder="Type a letter or word..."
-                autocomplete="off"
-                maxlength="20"
-              />
-              <button id="submit-btn" class="btn btn-primary" type="submit">Guess</button>
-            </div>
+            <button id="submit-btn" class="btn btn-primary" type="submit">Guess</button>
           </form>
 
           <div class="button-group">
@@ -122,7 +111,10 @@
           <div class="modal-stats">
             <p>The word was: <strong id="modal-word-reveal"></strong></p>
           </div>
-          <button id="modal-restart-btn" class="btn btn-primary" type="button">Play Again</button>
+          <div class="wordbook-actions">
+            <button id="modal-save-btn" class="btn btn-outline" type="button">Save Word</button>
+            <button id="modal-restart-btn" class="btn btn-primary" type="button">Play Again</button>
+          </div>
         </div>
       </dialog>
 
