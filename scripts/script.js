@@ -11,6 +11,7 @@ const scoreDisplay = document.getElementById("score-display");
 const streakDisplay = document.getElementById("streak-display");
 const livesDisplay = document.getElementById("lives-display");
 const wordLengthInfo = document.getElementById("word-length-info");
+const guessedInfo = document.getElementById("guessed-info");
 const guessForm = document.getElementById("guess-form");
 const wordDisplay = document.getElementById("word-display");
 const hintBox = document.getElementById("hint-box");
@@ -24,6 +25,7 @@ const wordbookClearBtn = document.getElementById("wordbook-clear-btn");
 const wordbookCloseBtn = document.getElementById("wordbook-close-btn");
 const gameBoard = document.querySelector(".game-board");
 const modal = document.getElementById("game-modal");
+const modalDescription = document.getElementById("modal-description");
 const modalWordReveal = document.getElementById("modal-word-reveal");
 const modalSaveBtn = document.getElementById("modal-save-btn");
 const modalRestartBtn = document.getElementById("modal-restart-btn");
@@ -32,18 +34,22 @@ let words = [];
 let currentWordIndex = 0;
 let currentWord = "";
 let revealedLetters = [];
+let guesses = new Set();
 let isWordSolved = false;
+let isGameOver = false;
 let hints = [];
 let revealedHints = 0;
 let score = 0;
 let streak = 0;
 let lives = 6;
+let activeDifficulty = difficulty.value;
 
 function resetGame() {
   score = 0;
   streak = 0;
   lives = 6;
   isWordSolved = false;
+  isGameOver = false;
   loadWords();
 }
 
@@ -63,9 +69,11 @@ async function loadWords() {
 async function startWord() {
   currentWord = (words[currentWordIndex] || "").toLowerCase();
   revealedLetters = Array(currentWord.length).fill("");
+  guesses = new Set();
   isWordSolved = false;
   revealedHints = 0;
   hints = [];
+  buildTiles();
   updateBoard();
 
   if (!currentWord) return;
@@ -73,14 +81,28 @@ async function startWord() {
   updateBoard();
 }
 
+function endGame(message) {
+  isGameOver = true;
+  streak = 0;
+  revealedLetters = [...currentWord];
+  outputMessage.textContent = message;
+  modalDescription.textContent = message;
+  modalWordReveal.textContent = currentWord;
+  updateBoard();
+  modal.showModal();
+}
+
 function updateBoard() {
-  const inputsDisabled = !currentWord || lives <= 0 || isWordSolved;
+  const inputsDisabled = !currentWord || isGameOver || isWordSolved;
+  const guessedLetters = [...guesses].filter((guess) => guess.length === 1);
 
   scoreDisplay.textContent = score;
   streakDisplay.textContent = streak;
   livesDisplay.textContent = lives;
   wordLengthInfo.textContent = currentWord ? `${currentWord.length} Letters` : "";
-  renderWord(inputsDisabled);
+  guessedInfo.hidden = guessedLetters.length === 0;
+  guessedInfo.textContent = `Guessed: ${guessedLetters.join(", ").toUpperCase()}`;
+  updateTiles(inputsDisabled);
   renderHints();
 
   const isSaved = wordbook.some((item) => item.word === currentWord);
@@ -97,14 +119,39 @@ function updateBoard() {
   giveUpBtn.disabled = inputsDisabled;
 }
 
-function renderWord(inputsDisabled) {
-  wordDisplay.innerHTML = revealedLetters
-    .map((letter, index) =>
-      letter
-        ? `<input type="text" class="letter-tile" value="${letter}" disabled />`
-        : `<input type="text" class="letter-tile empty" data-index="${index}" maxlength="1" placeholder="" autocomplete="off" ${inputsDisabled ? "disabled" : ""} />`,
-    )
-    .join("");
+function buildTiles() {
+  wordDisplay.replaceChildren(
+    ...[...currentWord].map((_, index) => {
+      const input = document.createElement("input");
+      input.type = "text";
+      input.className = "letter-tile empty";
+      input.dataset.index = index;
+      input.maxLength = 1;
+      input.autocomplete = "off";
+      return input;
+    }),
+  );
+}
+
+function updateTiles(inputsDisabled) {
+  wordDisplay.querySelectorAll("input").forEach((input, index) => {
+    const letter = revealedLetters[index];
+    if (letter) {
+      input.value = letter;
+      input.classList.remove("empty");
+      input.disabled = true;
+    } else {
+      input.disabled = inputsDisabled;
+    }
+  });
+}
+
+function getOpenTiles() {
+  return [...wordDisplay.querySelectorAll("input:not(:disabled)")];
+}
+
+function focusFirstTile() {
+  getOpenTiles()[0]?.focus();
 }
 
 function renderHints() {
@@ -119,34 +166,22 @@ function renderHints() {
     .join("");
 }
 
-function revealGuess(entries) {
+function revealLetter(char) {
   let matched = false;
-
-  if (entries.length === 1) {
-    const char = entries[0].char;
-    for (let i = 0; i < currentWord.length; i++) {
-      if (currentWord[i] === char) {
-        revealedLetters[i] = currentWord[i];
-        matched = true;
-      }
+  [...currentWord].forEach((letter, index) => {
+    if (letter === char) {
+      revealedLetters[index] = letter;
+      matched = true;
     }
-  } else {
-    for (const { index, char } of entries) {
-      if (currentWord[index] === char) {
-        revealedLetters[index] = currentWord[index];
-        matched = true;
-      }
-    }
-  }
-
+  });
   return matched;
 }
 
 wordDisplay.addEventListener("input", (event) => {
+  event.target.value = event.target.value.replace(/[^a-z]/gi, "");
   if (!event.target.value) return;
-  const enabled = [...wordDisplay.querySelectorAll("input:not(:disabled)")];
-  const next = enabled[enabled.indexOf(event.target) + 1];
-  next?.focus();
+  const openTiles = getOpenTiles();
+  openTiles[openTiles.indexOf(event.target) + 1]?.focus();
 });
 
 wordDisplay.addEventListener("keydown", (event) => {
@@ -156,26 +191,54 @@ wordDisplay.addEventListener("keydown", (event) => {
     return;
   }
   if (event.key === "Backspace" && !event.target.value) {
-    const enabled = [...wordDisplay.querySelectorAll("input:not(:disabled)")];
-    const prev = enabled[enabled.indexOf(event.target) - 1];
-    prev?.focus();
+    const openTiles = getOpenTiles();
+    openTiles[openTiles.indexOf(event.target) - 1]?.focus();
   }
 });
 
 guessForm.addEventListener("submit", (event) => {
   event.preventDefault();
-  if (!currentWord || lives <= 0 || isWordSolved) return;
+  if (!currentWord || isGameOver || isWordSolved) return;
 
-  const entries = [...wordDisplay.querySelectorAll("input:not(:disabled)")]
+  const openTiles = getOpenTiles();
+  const entries = openTiles
     .map((input) => ({
       index: Number(input.dataset.index),
       char: input.value.trim().toLowerCase(),
     }))
-    .filter((entry) => entry.char);
+    .filter((entry) => /^[a-z]$/.test(entry.char));
 
   if (!entries.length) return;
 
-  const matched = revealGuess(entries);
+  if (entries.length > 1 && entries.length < openTiles.length) {
+    outputMessage.textContent = "Guess one letter, or fill every tile to guess the word.";
+    return;
+  }
+
+  const guess =
+    entries.length === 1
+      ? entries[0].char
+      : revealedLetters
+          .map((letter, index) => letter || entries.find((entry) => entry.index === index).char)
+          .join("");
+
+  openTiles.forEach((input) => (input.value = ""));
+
+  if (guesses.has(guess)) {
+    outputMessage.textContent = `You already guessed "${guess.toUpperCase()}".`;
+    focusFirstTile();
+    return;
+  }
+
+  guesses.add(guess);
+
+  let isCorrect;
+  if (guess.length === 1) {
+    isCorrect = revealLetter(guess);
+  } else {
+    isCorrect = guess === currentWord;
+    if (isCorrect) revealedLetters = [...currentWord];
+  }
 
   if (revealedLetters.join("") === currentWord) {
     score += Math.max(0, 10 - revealedHints);
@@ -188,28 +251,28 @@ guessForm.addEventListener("submit", (event) => {
     return;
   }
 
-  if (entries.length === 1 && matched) {
+  if (isCorrect) {
     outputMessage.textContent = "Good guess!";
     updateBoard();
-    wordDisplay.querySelector("input:not(:disabled)")?.focus();
+    focusFirstTile();
     return;
   }
 
   lives -= 1;
   streak = 0;
-  outputMessage.textContent = "Wrong guess!";
-  updateBoard();
 
   if (lives <= 0) {
-    modalWordReveal.textContent = currentWord;
-    modal.showModal();
-  } else {
-    wordDisplay.querySelector("input:not(:disabled)")?.focus();
+    endGame("You ran out of lives.");
+    return;
   }
+
+  outputMessage.textContent = "Wrong guess!";
+  updateBoard();
+  focusFirstTile();
 });
 
 hintBtn.addEventListener("click", () => {
-  if (lives <= 0 || !currentWord || !hints.length || isWordSolved) return;
+  if (isGameOver || !currentWord || !hints.length || isWordSolved) return;
 
   if (revealedHints >= hints.length - 1) {
     outputMessage.textContent = "All hints revealed!";
@@ -222,9 +285,8 @@ hintBtn.addEventListener("click", () => {
 });
 
 giveUpBtn.addEventListener("click", () => {
-  if (!currentWord || isWordSolved) return;
-  modalWordReveal.textContent = currentWord;
-  modal.showModal();
+  if (!currentWord || isWordSolved || isGameOver) return;
+  endGame("You gave up.");
 });
 
 resetBtn.addEventListener("click", resetGame);
@@ -234,7 +296,18 @@ modalRestartBtn.addEventListener("click", () => {
   resetGame();
 });
 
-difficulty.addEventListener("change", resetGame);
+difficulty.addEventListener("change", () => {
+  const hasProgress = !isGameOver && (score > 0 || guesses.size > 0);
+  if (
+    hasProgress &&
+    !confirm("Changing difficulty starts a new game and resets your score. Continue?")
+  ) {
+    difficulty.value = activeDifficulty;
+    return;
+  }
+  activeDifficulty = difficulty.value;
+  resetGame();
+});
 
 function handleSaveWord() {
   saveWord(currentWord, hints);
@@ -262,6 +335,7 @@ wordbookOpenBtn.addEventListener("click", () => {
 wordbookCloseBtn.addEventListener("click", () => wordbookModal.close());
 
 wordbookClearBtn.addEventListener("click", () => {
+  if (!wordbook.length || !confirm("Clear all saved words?")) return;
   clearWordbook();
   updateBoard();
 });
@@ -270,9 +344,14 @@ resetGame();
 
 document.addEventListener("keydown", (event) => {
   const gameContainer = document.querySelector(".game-layout .container");
-  if (event.key !== "9" || !gameContainer || gameContainer.querySelector(".yuyu-gif")) return;
+  if (
+    event.key !== "9" ||
+    event.target.matches("input, select, textarea") ||
+    !gameContainer ||
+    gameContainer.querySelector(".yuyu-gif")
+  )
+    return;
 
-  event.preventDefault();
   const gif = document.createElement("img");
   gif.src = "Images/yuyulick.gif";
   gif.className = "yuyu-gif";

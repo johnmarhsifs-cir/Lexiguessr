@@ -5,6 +5,7 @@ const wordbookCount = document.getElementById("wordbook-count");
 export let wordbook = JSON.parse(localStorage.getItem("lexiguessr-wordbook") || "[]");
 
 export function saveWord(word, hints) {
+  if (!word || wordbook.some((item) => item.word === word)) return;
   wordbook.unshift({
     word,
     definition: hints[0]?.text || "",
