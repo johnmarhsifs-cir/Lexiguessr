@@ -1,4 +1,5 @@
 :root {
+  color-scheme: light;
   --bg: #f7f3e9;
   --dot: #d6cebc;
   --surface: #fdfbf7;
@@ -20,6 +21,7 @@
 }
 
 [data-theme="dark"] {
+  color-scheme: dark;
   --bg: #09090b;
   --dot: #1f1f23;
   --surface: #121215;
@@ -408,6 +410,11 @@ body {
   box-shadow: 0 0 0 3px var(--ring);
 }
 
+.letter-tile.empty:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .hint-box {
   display: flex;
   flex-wrap: wrap;
@@ -422,6 +429,33 @@ body {
 
 .hint-box[hidden] {
   display: none;
+}
+
+.hint-loading {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.hint-loading::before {
+  content: "";
+  width: 0.9rem;
+  height: 0.9rem;
+  border: 2px solid var(--border);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .wordbook-controls,
@@ -553,8 +587,21 @@ body {
     color 0.15s ease;
 }
 
-.btn:active {
+.btn:active:not(:disabled) {
   transform: scale(0.98);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn:focus-visible,
+.nav-tab:focus-visible,
+.navbar-brand:focus-visible,
+.footer-link:focus-visible {
+  outline: 2px solid var(--border-strong);
+  outline-offset: 2px;
 }
 
 .btn-sm {
@@ -569,7 +616,7 @@ body {
   border-color: var(--primary-shadow);
 }
 
-.btn-primary:hover {
+.btn-primary:hover:not(:disabled) {
   background: var(--primary-hover);
 }
 
@@ -579,7 +626,7 @@ body {
   border-color: var(--border);
 }
 
-.btn-secondary:hover {
+.btn-secondary:hover:not(:disabled) {
   border-color: var(--primary-shadow);
   background: var(--primary);
   color: var(--primary-fg);
@@ -591,7 +638,7 @@ body {
   border-color: var(--border);
 }
 
-.btn-outline:hover {
+.btn-outline:hover:not(:disabled) {
   color: var(--primary-fg);
   border-color: var(--primary-shadow);
   background: var(--primary);
@@ -886,4 +933,14 @@ body {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

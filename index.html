@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Lexiguessr - Word Guessing Game</title>
+    <script src="scripts/theme.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -20,8 +21,8 @@
     <header class="navbar">
       <div class="navbar-inner">
         <a href="index.html" class="navbar-brand">Lexiguessr</a>
-        <nav class="nav-tabs" aria-label="Main navigation">
-          <a href="index.html" class="nav-tab active">Game</a>
+        <nav class="nav-tabs">
+          <a href="index.html" class="nav-tab active" aria-current="page">Game</a>
           <a href="pages/docs.html" class="nav-tab">Documentation</a>
           <a href="pages/about.html" class="nav-tab">About</a>
         </nav>
@@ -35,12 +36,11 @@
           id="wordbook-open-btn"
           class="btn btn-secondary wordbook-bookmark"
           type="button"
-          aria-label="Wordbook"
         >
           <span class="material-symbols-rounded" aria-hidden="true">book</span>
           <span>Wordbook</span>
         </button>
-        <section class="stats-panel" aria-label="Game stats">
+        <section class="stats-panel">
           <div class="stat-card">
             <span class="stat-label">Score</span>
             <span id="score-display" class="stat-value">0</span>
@@ -55,17 +55,17 @@
           </div>
         </section>
 
-        <section class="game-board" aria-label="Word board">
+        <section class="game-board">
           <div class="word-meta">
             <span id="word-length-info" class="meta-tag">5 Letters</span>
             <span id="category-info" class="meta-tag">Random Word</span>
             <span id="guessed-info" class="meta-tag" hidden></span>
           </div>
 
-          <div id="word-display" class="word-display" aria-live="polite"></div>
+          <div id="word-display" class="word-display" role="group"></div>
         </section>
 
-        <section class="controls-section" aria-label="Controls and input">
+        <section class="controls-section">
           <div class="settings-row">
             <label for="difficulty-select" class="form-label">Difficulty</label>
             <select id="difficulty-select" name="difficulty" class="select-input">
@@ -87,10 +87,10 @@
           </div>
         </section>
 
-        <p id="output-message" class="output-message" role="status" aria-live="polite"></p>
+        <p id="output-message" class="output-message" role="status"></p>
       </div>
 
-      <aside class="hints-panel" aria-label="Hints">
+      <aside class="hints-panel">
         <div class="hints-header">
           <h2 class="hints-title">Hints</h2>
           <span id="hint-counter" class="meta-tag">1 / 10</span>
@@ -105,7 +105,12 @@
         </div>
       </aside>
 
-      <dialog id="game-modal" class="game-dialog">
+      <dialog
+        id="game-modal"
+        class="game-dialog"
+        aria-labelledby="modal-title"
+        aria-describedby="modal-description"
+      >
         <div class="dialog-card">
           <h2 id="modal-title" class="modal-title">Game Over</h2>
           <p id="modal-description" class="modal-desc"></p>
@@ -119,9 +124,9 @@
         </div>
       </dialog>
 
-      <dialog id="wordbook-modal" class="game-dialog">
+      <dialog id="wordbook-modal" class="game-dialog" aria-labelledby="wordbook-modal-title">
         <div class="dialog-card wordbook-dialog-card">
-          <h2 class="modal-title">Wordbook</h2>
+          <h2 id="wordbook-modal-title" class="modal-title">Wordbook</h2>
           <p id="wordbook-count" class="modal-desc"></p>
           <p id="wordbook-empty" class="modal-desc">No saved words yet.</p>
           <ul id="wordbook-list" class="wordbook-list"></ul>

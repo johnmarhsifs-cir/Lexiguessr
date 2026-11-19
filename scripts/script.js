@@ -1,6 +1,5 @@
 import { fetchWords, fetchHints } from "./api.js";
 import { wordbook, saveWord, clearWordbook, renderWordbook } from "./wordbook.js";
-import "./theme.js";
 
 const resetBtn = document.getElementById("reset-btn");
 const giveUpBtn = document.getElementById("give-up-btn");
@@ -34,57 +33,105 @@ let words = [];
 let currentWordIndex = 0;
 let currentWord = "";
 let revealedLetters = [];
-let guesses = new Set();
-let isWordSolved = false;
-let isGameOver = false;
+let guesses = [];
 let hints = [];
 let revealedHints = 0;
 let score = 0;
 let streak = 0;
 let lives = 6;
+let isWordSolved = false;
+let isGameOver = false;
+let isLoading = false;
 let activeDifficulty = difficulty.value;
+
+function canPlay() {
+  return !isLoading && currentWord !== "" && !isGameOver && !isWordSolved;
+}
+
+function getOpenTiles() {
+  return Array.from(wordDisplay.querySelectorAll("input:not(:disabled)"));
+}
+
+function focusFirstTile() {
+  const firstTile = getOpenTiles()[0];
+  if (firstTile) firstTile.focus();
+}
+
+function moveFocus(currentInput, step) {
+  const openTiles = getOpenTiles();
+  const nextTile = openTiles[openTiles.indexOf(currentInput) + step];
+  if (nextTile) nextTile.focus();
+}
+
+function clearRound() {
+  currentWord = "";
+  revealedLetters = [];
+  guesses = [];
+  hints = [];
+  revealedHints = 0;
+  isWordSolved = false;
+}
 
 function resetGame() {
   score = 0;
   streak = 0;
   lives = 6;
-  isWordSolved = false;
   isGameOver = false;
   loadWords();
 }
 
 async function loadWords() {
-  outputMessage.textContent = "Loading...";
+  isLoading = true;
+  clearRound();
+  buildTiles();
+  outputMessage.textContent = "Loading word...";
+  updateBoard();
 
   try {
     words = await fetchWords(difficulty.value);
     currentWordIndex = 0;
     await startWord();
-    outputMessage.textContent = "Ready!";
   } catch {
+    isLoading = false;
     outputMessage.textContent = "Error fetching words!";
+    updateBoard();
   }
 }
 
 async function startWord() {
+  clearRound();
   currentWord = (words[currentWordIndex] || "").toLowerCase();
   revealedLetters = Array(currentWord.length).fill("");
-  guesses = new Set();
-  isWordSolved = false;
-  revealedHints = 0;
-  hints = [];
   buildTiles();
+
+  if (!currentWord) {
+    isLoading = false;
+    outputMessage.textContent = "No words available.";
+    updateBoard();
+    return;
+  }
+
+  isLoading = true;
+  outputMessage.textContent = "Loading hints...";
   updateBoard();
 
-  if (!currentWord) return;
-  hints = await fetchHints(currentWord);
+  try {
+    hints = await fetchHints(currentWord);
+  } finally {
+    isLoading = false;
+  }
+
+  outputMessage.textContent = "Ready!";
   updateBoard();
+  if (!modal.open && !wordbookModal.open) {
+    focusFirstTile();
+  }
 }
 
 function endGame(message) {
   isGameOver = true;
   streak = 0;
-  revealedLetters = [...currentWord];
+  revealedLetters = currentWord.split("");
   outputMessage.textContent = message;
   modalDescription.textContent = message;
   modalWordReveal.textContent = currentWord;
@@ -92,152 +139,161 @@ function endGame(message) {
   modal.showModal();
 }
 
-function updateBoard() {
-  const inputsDisabled = !currentWord || isGameOver || isWordSolved;
-  const guessedLetters = [...guesses].filter((guess) => guess.length === 1);
-
-  scoreDisplay.textContent = score;
-  streakDisplay.textContent = streak;
-  livesDisplay.textContent = lives;
-  wordLengthInfo.textContent = currentWord ? `${currentWord.length} Letters` : "";
-  guessedInfo.hidden = guessedLetters.length === 0;
-  guessedInfo.textContent = `Guessed: ${guessedLetters.join(", ").toUpperCase()}`;
-  updateTiles(inputsDisabled);
-  renderHints();
-
-  const isSaved = wordbook.some((item) => item.word === currentWord);
-  hintBtn.hidden = isWordSolved;
-  saveWordBtn.hidden = !isWordSolved;
-  saveWordBtn.disabled = isSaved;
-  saveWordBtn.textContent = isSaved ? "Saved" : "Save Word";
-  modalSaveBtn.disabled = isSaved;
-  modalSaveBtn.textContent = isSaved ? "Saved" : "Save Word";
-  nextWordBtn.hidden = !isWordSolved;
-
-  submitBtn.disabled = inputsDisabled;
-  hintBtn.disabled = inputsDisabled;
-  giveUpBtn.disabled = inputsDisabled;
-}
-
 function buildTiles() {
-  wordDisplay.replaceChildren(
-    ...[...currentWord].map((_, index) => {
-      const input = document.createElement("input");
-      input.type = "text";
-      input.className = "letter-tile empty";
-      input.dataset.index = index;
-      input.maxLength = 1;
-      input.autocomplete = "off";
-      return input;
-    }),
-  );
+  wordDisplay.innerHTML = "";
+  for (let i = 0; i < currentWord.length; i++) {
+    const input = document.createElement("input");
+    input.type = "text";
+    input.className = "letter-tile empty";
+    input.maxLength = 1;
+    input.autocomplete = "off";
+    input.spellcheck = false;
+    input.inputMode = "text";
+    input.pattern = "[A-Za-z]";
+    input.setAttribute("autocapitalize", "off");
+    wordDisplay.appendChild(input);
+  }
 }
 
-function updateTiles(inputsDisabled) {
-  wordDisplay.querySelectorAll("input").forEach((input, index) => {
-    const letter = revealedLetters[index];
+function updateTiles(disabled) {
+  const inputs = wordDisplay.querySelectorAll("input");
+  for (let i = 0; i < inputs.length; i++) {
+    const input = inputs[i];
+    const letter = revealedLetters[i];
     if (letter) {
       input.value = letter;
       input.classList.remove("empty");
       input.disabled = true;
     } else {
-      input.disabled = inputsDisabled;
+      input.disabled = disabled;
     }
-  });
-}
-
-function getOpenTiles() {
-  return [...wordDisplay.querySelectorAll("input:not(:disabled)")];
-}
-
-function focusFirstTile() {
-  getOpenTiles()[0]?.focus();
+  }
 }
 
 function renderHints() {
+  if (isLoading) {
+    hintBox.hidden = false;
+    hintCounter.textContent = "Loading...";
+    hintBox.innerHTML = `<p class="hint-loading">Loading hints...</p>`;
+    return;
+  }
+
   const visibleHints = hints.slice(0, revealedHints + 1);
   hintBox.hidden = visibleHints.length === 0;
-  hintCounter.textContent = `${visibleHints.length} / 10`;
-  hintBox.innerHTML = visibleHints
-    .map(
-      (hint) =>
-        `<div class="hint-item"><span class="hint-badge">${hint.category}</span><span class="hint-text">${hint.text}</span></div>`,
-    )
-    .join("");
+  hintCounter.textContent = `${visibleHints.length} / ${hints.length || 10}`;
+
+  let html = "";
+  for (const hint of visibleHints) {
+    html += `<div class="hint-item"><span class="hint-badge">${hint.category}</span><span class="hint-text">${hint.text}</span></div>`;
+  }
+  hintBox.innerHTML = html;
+}
+
+function updateBoard() {
+  const disabled = !canPlay();
+  const guessedLetters = [];
+  for (const guess of guesses) {
+    if (guess.length === 1) guessedLetters.push(guess);
+  }
+
+  scoreDisplay.textContent = score;
+  streakDisplay.textContent = streak;
+  livesDisplay.textContent = lives;
+
+  if (currentWord) {
+    wordLengthInfo.textContent = `${currentWord.length} Letters`;
+  } else if (isLoading) {
+    wordLengthInfo.textContent = "Loading...";
+  } else {
+    wordLengthInfo.textContent = "";
+  }
+
+  guessedInfo.hidden = guessedLetters.length === 0;
+  guessedInfo.textContent = `Guessed: ${guessedLetters.join(", ").toUpperCase()}`;
+  wordDisplay.setAttribute("aria-busy", String(isLoading));
+  hintBox.setAttribute("aria-busy", String(isLoading));
+
+  updateTiles(disabled);
+  renderHints();
+
+  const isSaved = wordbook.some((item) => item.word === currentWord);
+  const saveDisabled = isLoading || !currentWord || isSaved;
+  const saveLabel = isSaved ? "Saved" : "Save Word";
+
+  hintBtn.hidden = isWordSolved;
+  saveWordBtn.hidden = !isWordSolved;
+  nextWordBtn.hidden = !isWordSolved;
+
+  saveWordBtn.disabled = saveDisabled;
+  saveWordBtn.textContent = saveLabel;
+  modalSaveBtn.disabled = saveDisabled;
+  modalSaveBtn.textContent = saveLabel;
+
+  submitBtn.disabled = disabled;
+  hintBtn.disabled = disabled;
+  giveUpBtn.disabled = disabled;
 }
 
 function revealLetter(char) {
   let matched = false;
-  [...currentWord].forEach((letter, index) => {
-    if (letter === char) {
-      revealedLetters[index] = letter;
+  for (let i = 0; i < currentWord.length; i++) {
+    if (currentWord[i] === char) {
+      revealedLetters[i] = char;
       matched = true;
     }
-  });
+  }
   return matched;
 }
 
-wordDisplay.addEventListener("input", (event) => {
-  event.target.value = event.target.value.replace(/[^a-z]/gi, "");
-  if (!event.target.value) return;
-  const openTiles = getOpenTiles();
-  openTiles[openTiles.indexOf(event.target) + 1]?.focus();
-});
-
-wordDisplay.addEventListener("keydown", (event) => {
-  if (event.key === "Enter") {
-    event.preventDefault();
-    guessForm.requestSubmit();
-    return;
-  }
-  if (event.key === "Backspace" && !event.target.value) {
-    const openTiles = getOpenTiles();
-    openTiles[openTiles.indexOf(event.target) - 1]?.focus();
-  }
-});
-
-guessForm.addEventListener("submit", (event) => {
+function handleGuess(event) {
   event.preventDefault();
-  if (!currentWord || isGameOver || isWordSolved) return;
+  if (!canPlay()) return;
 
+  const allTiles = wordDisplay.querySelectorAll("input");
   const openTiles = getOpenTiles();
-  const entries = openTiles
-    .map((input) => ({
-      index: Number(input.dataset.index),
-      char: input.value.trim().toLowerCase(),
-    }))
-    .filter((entry) => /^[a-z]$/.test(entry.char));
+  const typedLetters = [];
 
-  if (!entries.length) return;
+  for (const input of openTiles) {
+    const char = input.value.trim().toLowerCase();
+    if (/^[a-z]$/.test(char)) {
+      typedLetters.push(char);
+    }
+  }
 
-  if (entries.length > 1 && entries.length < openTiles.length) {
+  if (typedLetters.length === 0) return;
+
+  if (typedLetters.length > 1 && typedLetters.length < openTiles.length) {
     outputMessage.textContent = "Guess one letter, or fill every tile to guess the word.";
     return;
   }
 
-  const guess =
-    entries.length === 1
-      ? entries[0].char
-      : revealedLetters
-          .map((letter, index) => letter || entries.find((entry) => entry.index === index).char)
-          .join("");
+  let guess = "";
+  if (typedLetters.length === 1) {
+    guess = typedLetters[0];
+  } else {
+    for (const input of allTiles) {
+      guess += input.value.trim().toLowerCase();
+    }
+  }
 
-  openTiles.forEach((input) => (input.value = ""));
+  for (const input of openTiles) {
+    input.value = "";
+  }
 
-  if (guesses.has(guess)) {
+  if (guesses.includes(guess)) {
     outputMessage.textContent = `You already guessed "${guess.toUpperCase()}".`;
     focusFirstTile();
     return;
   }
 
-  guesses.add(guess);
+  guesses.push(guess);
 
-  let isCorrect;
+  let isCorrect = false;
   if (guess.length === 1) {
     isCorrect = revealLetter(guess);
-  } else {
-    isCorrect = guess === currentWord;
-    if (isCorrect) revealedLetters = [...currentWord];
+  } else if (guess === currentWord) {
+    isCorrect = true;
+    revealedLetters = currentWord.split("");
   }
 
   if (revealedLetters.join("") === currentWord) {
@@ -248,6 +304,7 @@ guessForm.addEventListener("submit", (event) => {
     gameBoard.classList.add("correct-flash");
     setTimeout(() => gameBoard.classList.remove("correct-flash"), 650);
     updateBoard();
+    nextWordBtn.focus();
     return;
   }
 
@@ -269,10 +326,38 @@ guessForm.addEventListener("submit", (event) => {
   outputMessage.textContent = "Wrong guess!";
   updateBoard();
   focusFirstTile();
+}
+
+function handleSaveWord() {
+  saveWord(currentWord, hints);
+  outputMessage.textContent = `Saved "${currentWord}" to your wordbook.`;
+  updateBoard();
+}
+
+wordDisplay.addEventListener("input", (event) => {
+  event.target.value = event.target.value.replace(/[^a-z]/gi, "");
+  if (event.target.value) moveFocus(event.target, 1);
 });
 
+wordDisplay.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    guessForm.requestSubmit();
+  } else if (event.key === "ArrowLeft") {
+    event.preventDefault();
+    moveFocus(event.target, -1);
+  } else if (event.key === "ArrowRight") {
+    event.preventDefault();
+    moveFocus(event.target, 1);
+  } else if (event.key === "Backspace" && !event.target.value) {
+    moveFocus(event.target, -1);
+  }
+});
+
+guessForm.addEventListener("submit", handleGuess);
+
 hintBtn.addEventListener("click", () => {
-  if (isGameOver || !currentWord || !hints.length || isWordSolved) return;
+  if (!canPlay() || hints.length === 0) return;
 
   if (revealedHints >= hints.length - 1) {
     outputMessage.textContent = "All hints revealed!";
@@ -285,7 +370,7 @@ hintBtn.addEventListener("click", () => {
 });
 
 giveUpBtn.addEventListener("click", () => {
-  if (!currentWord || isWordSolved || isGameOver) return;
+  if (!canPlay()) return;
   endGame("You gave up.");
 });
 
@@ -297,7 +382,7 @@ modalRestartBtn.addEventListener("click", () => {
 });
 
 difficulty.addEventListener("change", () => {
-  const hasProgress = !isGameOver && (score > 0 || guesses.size > 0);
+  const hasProgress = !isGameOver && (score > 0 || guesses.length > 0);
   if (
     hasProgress &&
     !confirm("Changing difficulty starts a new game and resets your score. Continue?")
@@ -308,12 +393,6 @@ difficulty.addEventListener("change", () => {
   activeDifficulty = difficulty.value;
   resetGame();
 });
-
-function handleSaveWord() {
-  saveWord(currentWord, hints);
-  outputMessage.textContent = `Saved "${currentWord}" to your wordbook.`;
-  updateBoard();
-}
 
 saveWordBtn.addEventListener("click", handleSaveWord);
 modalSaveBtn.addEventListener("click", handleSaveWord);
@@ -340,22 +419,20 @@ wordbookClearBtn.addEventListener("click", () => {
   updateBoard();
 });
 
-resetGame();
-
 document.addEventListener("keydown", (event) => {
+  if (event.key !== "9") return;
+  if (event.target.matches("input, select, textarea")) return;
+
   const gameContainer = document.querySelector(".game-layout .container");
-  if (
-    event.key !== "9" ||
-    event.target.matches("input, select, textarea") ||
-    !gameContainer ||
-    gameContainer.querySelector(".yuyu-gif")
-  )
-    return;
+  if (!gameContainer || gameContainer.querySelector(".yuyu-gif")) return;
 
   const gif = document.createElement("img");
   gif.src = "Images/yuyulick.gif";
+  gif.alt = "";
   gif.className = "yuyu-gif";
   gameContainer.appendChild(gif);
 
   setTimeout(() => gif.remove(), 3000);
 });
+
+resetGame();
